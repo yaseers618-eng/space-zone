@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f4f8ff">
+    <script>
+        try {
+            const savedTheme = localStorage.getItem("spacezone-tools-theme");
+            document.documentElement.dataset.toolsTheme = savedTheme === "dark" ? "dark" : "light";
+        } catch (error) {
+            console.warn("Could not restore the saved tools theme.", error);
+            document.documentElement.dataset.toolsTheme = "light";
+        }
+    </script>
+    {% if tool == "geo_aeo" %}
+    <meta name="description" content="Create FAQPage structured data from your real customer questions and answers.">
+    <title>GEO / AEO FAQ Builder | Space Zone</title>
+    {% else %}
+    <meta name="description" content="Get free SEO and marketing guidance from the Space Zone chatbot.">
+    <title>Free SEO Chatbot | Space Zone</title>
+    {% endif %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: light;
+            --page: #f4f8ff;
+            --surface: #fff;
+            --text: #163252;
+            --muted: #536982;
+            --accent: #216bd6;
+            --cyan: #216bd6;
+            --line: rgba(37, 90, 156, .18);
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; background: var(--page); color: var(--text); font: 16px/1.6 "DM Sans", sans-serif; }
+        a { color: inherit; text-decoration: none; }
+        button, input, textarea { font: inherit; }
+        .shell { width: min(900px, calc(100% - 40px)); margin: 0 auto; }
+        .site-header { border-bottom: 1px solid var(--line); background: rgba(255,255,255,.94); }
+        .nav-row { min-height: 74px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+        .brand { color: #173a63; font: 700 20px "Space Grotesk", sans-serif; }
+        .nav-links { display: flex; gap: 22px; color: #536982; font-size: 14px; }
+        .nav-links a:hover, .back-link:hover { color: #216bd6; }
+        .tool-page { padding: 68px 0 90px; }
+        .eyebrow { color: #216bd6; font-size: 12px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; }
+        h1, h2 { font-family: "Space Grotesk", sans-serif; line-height: 1.15; }
+        h1 { margin: 12px 0; font-size: clamp(34px, 6vw, 52px); letter-spacing: -1.8px; }
+        .intro { max-width: 690px; margin: 0 0 30px; color: var(--muted); }
+        .utility-tool { padding: clamp(22px, 5vw, 38px); border: 1px solid var(--line); border-radius: 20px; background: var(--surface); box-shadow: 0 14px 34px rgba(32, 77, 131, .08); }
+        .utility-tool h2 { margin: 0 0 10px; font-size: 23px; }
+        .utility-tool > p { color: var(--muted); }
+        .tool-form { display: grid; gap: 18px; margin-top: 24px; }
+        .tool-field { display: grid; gap: 7px; }
+        .tool-field label { color: #24486f; font-size: 14px; font-weight: 600; }
+        .tool-field input, .tool-field textarea {
+            width: 100%; min-height: 48px; padding: 12px 14px; border: 1px solid rgba(37,90,156,.24);
+            border-radius: 10px; background: #f9fbff; color: var(--text);
+        }
+        .tool-field textarea { min-height: 110px; resize: vertical; }
+        .tool-field input:focus, .tool-field textarea:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+        .tool-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+        .button { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; padding: 0 17px; border: 1px solid transparent; border-radius: 10px; background: linear-gradient(110deg, #3479ed, #43b1ef); color: #fff; font-weight: 700; cursor: pointer; }
+        .button-quiet { border-color: rgba(33,107,214,.25); background: #edf4ff; color: #1d5cad; }
+        .button-quiet:hover { background: #e1edff; }
+        .button:disabled { opacity: .6; cursor: wait; }
+        .tool-output, .chat-results { width: 100%; padding: 14px; border: 1px solid var(--line); border-radius: 10px; background: #f9fbff; color: var(--text); overflow-wrap: anywhere; }
+        .tool-output { min-height: 180px; resize: vertical; }
+        .chat-results h2 { margin: 0 0 8px; font-size: 18px; }
+        .chat-results p { margin: 0; white-space: pre-wrap; }
+        .tool-status { min-height: 24px; margin: 0; color: var(--muted); font-size: 13px; }
+        .tool-status.success { color: #16734a; }
+        .tool-status.error { color: #b42332; }
+        .back-link { display: inline-block; margin-top: 25px; color: #1d5cad; font-size: 14px; }
+        .theme-toggle {
+            min-height: 38px;
+            padding: 0 13px;
+            border: 1px solid rgba(33,107,214,.25);
+            border-radius: 10px;
+            background: #edf4ff;
+            color: #1d5cad;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .theme-toggle:hover { background: #e1edff; }
+        ::view-transition-old(root),
+        ::view-transition-new(root) { animation-duration: .7s; }
+        ::view-transition-new(root) {
+            animation: theme-reveal .7s cubic-bezier(.2,.75,.25,1) both;
+        }
+        @keyframes theme-reveal {
+            from { clip-path: circle(0 at var(--theme-switch-x, 50vw) var(--theme-switch-y, 50vh)); }
+            to { clip-path: circle(150vmax at var(--theme-switch-x, 50vw) var(--theme-switch-y, 50vh)); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            ::view-transition-old(root),
+            ::view-transition-new(root) { animation-duration: .01ms !important; }
+        }
+        html[data-tools-theme="dark"] body {
+            color-scheme: dark;
+            --page: #080b18;
+            --surface: #101528;
+            --text: #f5f6ff;
+            --muted: #a1a8c2;
+            --accent: #70aaff;
+            --cyan: #7be0f2;
+            --line: rgba(198,205,255,.13);
+        }
+        html[data-tools-theme="dark"] .site-header { border-bottom-color: var(--line); background: rgba(8,11,24,.94); }
+        html[data-tools-theme="dark"] .brand { color: var(--text); }
+        html[data-tools-theme="dark"] .nav-links { color: var(--muted); }
+        html[data-tools-theme="dark"] .nav-links a:hover,
+        html[data-tools-theme="dark"] .back-link:hover { color: var(--text); }
+        html[data-tools-theme="dark"] .eyebrow,
+        html[data-tools-theme="dark"] .back-link { color: var(--cyan); }
+        html[data-tools-theme="dark"] .utility-tool { border-color: var(--line); background: var(--surface); box-shadow: 0 14px 34px rgba(0,0,0,.2); }
+        html[data-tools-theme="dark"] .tool-field label { color: #dce5ff; }
+        html[data-tools-theme="dark"] .tool-field input,
+        html[data-tools-theme="dark"] .tool-field textarea,
+        html[data-tools-theme="dark"] .tool-output,
+        html[data-tools-theme="dark"] .chat-results { border-color: var(--line); background: #0b1021; color: var(--text); }
+        html[data-tools-theme="dark"] .button-quiet,
+        html[data-tools-theme="dark"] .theme-toggle { border-color: rgba(255,255,255,.2); background: rgba(255,255,255,.045); color: var(--text); }
+        html[data-tools-theme="dark"] .button-quiet:hover,
+        html[data-tools-theme="dark"] .theme-toggle:hover { background: rgba(255,255,255,.1); }
+        html[data-tools-theme="dark"] .tool-status { color: var(--muted); }
+        html[data-tools-theme="dark"] .tool-status.success { color: #96e4c1; }
+        html[data-tools-theme="dark"] .tool-status.error { color: #ffb3bb; }
+        html[data-tools-theme="dark"] :focus-visible { outline-color: var(--accent); }
+        @media (max-width: 600px) {
+            .nav-row { align-items: flex-start; flex-direction: column; justify-content: center; padding: 13px 0; }
+            .nav-links { flex-wrap: wrap; gap: 8px 16px; }
+            .tool-page { padding-top: 42px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <nav class="shell nav-row" aria-label="Main navigation">
+            <a class="brand" href="{{ url_for('hello_world') }}">Space Zone</a>
+            <div class="nav-links">
+                <a href="{{ url_for('hello_world') }}#tools">Product tools</a>
+                <a href="{{ url_for('chatbot_page') }}">Chatbot</a>
+                {% if current_user %}
+                <a href="{{ url_for('user_dashboard') }}">Dashboard</a>
+                {% else %}
+                <a href="{{ url_for('user_login') }}">Sign in</a>
+                {% endif %}
+            </div>
+            <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to dark mode" aria-pressed="false">Dark mode</button>
+        </nav>
+    </header>
+    <main class="tool-page">
+        <div class="shell">
+            {% if tool == "geo_aeo" %}
+            <span class="eyebrow">GEO / AEO</span>
+            <h1>FAQ structured data builder</h1>
+            <p class="intro">Turn real customer questions and answers into FAQPage JSON-LD to review and add to your page source. Structured data does not guarantee enhanced search results.</p>
+            <article class="utility-tool">
+                <h2>Write your FAQs</h2>
+                <p>Use the same accurate questions and answers visibly on your website.</p>
+                <form class="tool-form" id="faqSchemaForm">
+                    <div class="tool-field"><label for="faqQuestion1">Question 1</label><input id="faqQuestion1" maxlength="240" required placeholder="What does your service help with?"></div>
+                    <div class="tool-field"><label for="faqAnswer1">Answer 1</label><textarea id="faqAnswer1" maxlength="1000" required placeholder="Write a concise, accurate answer."></textarea></div>
+                    <div class="tool-field"><label for="faqQuestion2">Question 2 (optional)</label><input id="faqQuestion2" maxlength="240" placeholder="How can customers get started?"></div>
+                    <div class="tool-field"><label for="faqAnswer2">Answer 2 (optional)</label><textarea id="faqAnswer2" maxlength="1000" placeholder="Add a second answer if you filled in the question."></textarea></div>
+                    <div class="tool-actions">
+                        <button class="button" type="submit">Build FAQ data</button>
+                        <button class="button button-quiet" id="copyFaqSchema" type="button">Copy JSON-LD</button>
+                    </div>
+                    <textarea class="tool-output" id="faqSchemaOutput" aria-label="Generated FAQ structured data" readonly hidden></textarea>
+                    <p class="tool-status" id="faqSchemaStatus" role="status" aria-live="polite"></p>
+                </form>
+            </article>
+            {% else %}
+            <span class="eyebrow">Free SEO and marketing chatbot</span>
+            <h1>Quick answers for your next marketing move.</h1>
+            <p class="intro">Ask about keywords, SEO titles, content, campaigns, pricing, or website basics. This chatbot uses built-in answers—no API key or paid AI service needed.</p>
+            <article class="utility-tool">
+                <h2>Ask Space Zone</h2>
+                <form class="tool-form" id="aiForm" action="{{ url_for('chat_reply') }}" method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <div class="tool-field">
+                        <label for="aiTopic">Ask a question or enter a topic</label>
+                        <input id="aiTopic" name="topic" maxlength="300" placeholder="For example, how do I find SEO keywords?" required>
+                    </div>
+                    <div class="tool-actions"><button class="button" id="aiSubmit" type="submit">Send message</button></div>
+                    <p class="tool-status" id="aiStatus" role="status" aria-live="polite">Free built-in answers · no account or API key required. Replies are general guidance, not live analytics.</p>
+                    <div class="chat-results" id="aiResults" hidden>
+                        <h2>Space Zone</h2>
+                        <p id="aiSuggestions"></p>
+                    </div>
+                </form>
+            </article>
+            {% endif %}
+            <a class="back-link" href="{{ url_for('hello_world') }}">← Back to Space Zone home</a>
+        </div>
+    </main>
+    <script>
+        (() => {
+            const root = document.documentElement;
+            const toggle = document.getElementById("themeToggle");
+            const themeColor = document.querySelector('meta[name="theme-color"]');
+            const updateToggle = () => {
+                const darkMode = root.dataset.toolsTheme === "dark";
+                toggle.textContent = darkMode ? "White mode" : "Dark mode";
+                toggle.setAttribute("aria-label", darkMode ? "Switch to white mode" : "Switch to dark mode");
+                toggle.setAttribute("aria-pressed", String(darkMode));
+                themeColor.content = darkMode ? "#080b18" : "#f4f8ff";
+            };
+            updateToggle();
+            toggle.addEventListener("click", () => {
+                const nextTheme = root.dataset.toolsTheme === "dark" ? "light" : "dark";
+                const bounds = toggle.getBoundingClientRect();
+                root.style.setProperty("--theme-switch-x", `${bounds.left + bounds.width / 2}px`);
+                root.style.setProperty("--theme-switch-y", `${bounds.top + bounds.height / 2}px`);
+                try {
+                    localStorage.setItem("spacezone-tools-theme", nextTheme);
+                } catch (error) {
+                    console.warn("Could not save the tools theme preference.", error);
+                }
+                const applyTheme = () => {
+                    root.dataset.toolsTheme = nextTheme;
+                    updateToggle();
+                };
+                if (document.startViewTransition && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+                    document.startViewTransition(applyTheme);
+                } else {
+                    applyTheme();
+                }
+            });
+        })();
+        const isSignedIn = {{ "true" if current_user else "false" }};
+        const csrfToken = {{ csrf_token|tojson }};
+        const saveUrl = {{ url_for('save_dashboard_item')|tojson }};
+        const loginUrl = {{ url_for('user_login')|tojson }};
+        const setSaveStatus = (message) => {
+            const status = document.querySelector(".tool-status");
+            status.textContent = message;
+            status.classList.remove("success", "error");
+            if (message === "Saved to your dashboard.") status.classList.add("success");
+            else if (message !== "Generate a result before saving it.") status.classList.add("error");
+        };
+        const addSaveAction = (container, key, title, filename, getContent) => {
+            if (container.querySelector(`[data-save-key="${key}"]`)) return;
+            const action = document.createElement(isSignedIn ? "button" : "a");
+            action.className = "button button-quiet";
+            action.dataset.saveKey = key;
+            if (isSignedIn) {
+                action.type = "button";
+                action.textContent = "Save to dashboard";
+                action.addEventListener("click", async () => {
+                    const content = getContent();
+                    if (!content.trim()) {
+                        setSaveStatus("Generate a result before saving it.");
+                        return;
+                    }
+                    action.disabled = true;
+                    try {
+                        const response = await fetch(saveUrl, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json", "X-CSRF-Token": csrfToken },
+                            body: JSON.stringify({ title, filename, content })
+                        });
+                        const result = await response.json();
+                        if (!response.ok) throw new Error(result.error || "Could not save this result.");
+                        setSaveStatus("Saved to your dashboard.");
+                    } catch (error) {
+                        setSaveStatus(error instanceof Error ? error.message : "Could not save this result.");
+                    } finally {
+                        action.disabled = false;
+                    }
+                });
+            } else {
+                action.href = loginUrl;
+                action.textContent = "Sign in first to save";
+            }
+            container.append(action);
+        };
+
+        (() => {
+            const form = document.getElementById("faqSchemaForm");
+            if (!form) return;
+            const output = document.getElementById("faqSchemaOutput");
+            const status = document.getElementById("faqSchemaStatus");
+            const setStatus = (message, state = "") => {
+                status.textContent = message;
+                status.className = `tool-status${state ? ` ${state}` : ""}`;
+            };
+            form.addEventListener("submit", (event) => {
+                event.preventDefault();
+                const mainEntity = [];
+                for (const [questionId, answerId] of [["faqQuestion1", "faqAnswer1"], ["faqQuestion2", "faqAnswer2"]]) {
+                    const question = document.getElementById(questionId).value.trim();
+                    const answer = document.getElementById(answerId).value.trim();
+                    if (question && answer) {
+                        mainEntity.push({
+                            "@type": "Question",
+                            name: question,
+                            acceptedAnswer: { "@type": "Answer", text: answer }
+                        });
+                    } else if (question || answer) {
+                        setStatus("Each FAQ needs both a question and an answer.", "error");
+                        return;
+                    }
+                }
+                if (!mainEntity.length) {
+                    setStatus("Add at least one question and answer.", "error");
+                    return;
+                }
+                output.value = JSON.stringify({
+                    "@context": "https://schema.org",
+                    "@type": "FAQPage",
+                    mainEntity
+                }, null, 2).replace(/</g, "\\u003c");
+                output.hidden = false;
+                setStatus("FAQ JSON-LD is ready. Make sure these questions and answers are visible on your page.", "success");
+                addSaveAction(
+                    form.querySelector(".tool-actions"),
+                    "faq-schema",
+                    "FAQ structured data",
+                    "faq-schema.json",
+                    () => output.value
+                );
+            });
+            document.getElementById("copyFaqSchema").addEventListener("click", async () => {
+                if (!output.value.trim()) {
+                    setStatus("Generate some content before copying.", "error");
+                    return;
+                }
+                try {
+                    await navigator.clipboard.writeText(output.value);
+                    setStatus("Copied to clipboard.", "success");
+                } catch (error) {
+                    output.focus();
+                    output.select();
+                    setStatus("Clipboard access was unavailable. The text is selected so you can copy it.");
+                }
+            });
+        })();
+
+        (() => {
+            const form = document.getElementById("aiForm");
+            if (!form) return;
+            const button = document.getElementById("aiSubmit");
+            const status = document.getElementById("aiStatus");
+            const results = document.getElementById("aiResults");
+            const suggestions = document.getElementById("aiSuggestions");
+            form.addEventListener("submit", async (event) => {
+                event.preventDefault();
+                button.disabled = true;
+                button.textContent = "Sending...";
+                status.classList.remove("error");
+                status.textContent = "Space Zone is replying...";
+                results.hidden = true;
+                try {
+                    const response = await fetch(form.action, {
+                        method: "POST",
+                        body: new FormData(form),
+                        headers: { Accept: "application/json" }
+                    });
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.error || "Space Zone couldn't reply. Please try again.");
+                    suggestions.textContent = data.suggestions;
+                    results.hidden = false;
+                    status.textContent = "Reply received. These are general suggestions; verify details before publishing.";
+                    addSaveAction(
+                        results,
+                        "chat-reply",
+                        "Space Zone chat reply",
+                        "chat-reply.txt",
+                        () => suggestions.textContent
+                    );
+                } catch (error) {
+                    status.classList.add("error");
+                    status.textContent = error instanceof Error ? error.message : "Chat is temporarily unavailable.";
+                } finally {
+                    button.disabled = false;
+                    button.textContent = "Send message";
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

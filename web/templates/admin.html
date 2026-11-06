@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#080b18">
+    <title>Admin dashboard | Space Zone</title>
+    <style>
+        :root { color-scheme: dark; --page: #080b18; --panel: #101528; --panel-2: #141a30; --text: #f5f6ff; --muted: #a1a8c2; --line: rgba(198,205,255,.14); --accent: #70aaff; --cyan: #7be0f2; }
+        * { box-sizing: border-box; }
+        body { min-height: 100vh; margin: 0; background: var(--page); color: var(--text); font: 14px/1.6 "Segoe UI", sans-serif; }
+        a { color: inherit; }
+        .shell { width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
+        header { border-bottom: 1px solid var(--line); }
+        .nav { min-height: 74px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+        .brand { display: inline-flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; text-decoration: none; }
+        .brand-mark { width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid rgba(112,170,255,.5); border-radius: 11px; color: var(--cyan); }
+        .brand-mark svg { width: 20px; height: 20px; }
+        .nav-right { display: flex; align-items: center; gap: 18px; color: var(--muted); font-size: 13px; }
+        .nav-right a { text-decoration: none; }
+        .logout { padding: 8px 12px; border: 1px solid var(--line); border-radius: 9px; background: transparent; color: var(--text); cursor: pointer; font: inherit; }
+        main { padding: 50px 0 80px; }
+        .eyebrow { color: var(--cyan); font-size: 11px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase; }
+        h1 { margin: 8px 0; font-size: clamp(31px, 5vw, 42px); letter-spacing: -1.4px; }
+        .subheading { margin: 0; color: var(--muted); }
+        .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 30px 0; }
+        .stat { padding: 20px; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); }
+        .stat span { display: block; color: var(--muted); font-size: 12px; }
+        .stat strong { display: block; margin-top: 5px; font-size: 27px; }
+        .table-card { overflow: hidden; border: 1px solid var(--line); border-radius: 16px; background: var(--panel); }
+        .table-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 20px; border-bottom: 1px solid var(--line); }
+        .table-heading h2 { margin: 0; font-size: 17px; }
+        .table-heading span { color: var(--muted); font-size: 11px; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 14px 20px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+        th { color: var(--muted); font-size: 10px; font-weight: 600; letter-spacing: .8px; text-transform: uppercase; }
+        tbody tr:last-child td { border-bottom: 0; }
+        .status { display: inline-flex; padding: 4px 9px; border-radius: 999px; background: rgba(255,193,115,.1); color: #f2d4a9; font-size: 11px; }
+        .status.sent { background: rgba(119,227,226,.1); color: var(--cyan); }
+        .status.failed { background: rgba(255,140,150,.1); color: #ffb3bb; }
+        .email-setup { margin: 22px 0; padding: 17px 19px; border: 1px solid rgba(255,193,115,.3); border-radius: 12px; background: rgba(255,193,115,.07); color: #f2d4a9; }
+        .email-setup strong { display: block; margin-bottom: 5px; color: #ffe3b7; }
+        .email-setup p { margin: 0; font-size: 12px; }
+        .email-setup code { color: var(--text); }
+        .next-steps { margin: 28px 0; padding: 22px; border: 1px solid var(--line); border-radius: 16px; background: linear-gradient(145deg, var(--panel), var(--panel-2)); }
+        .next-steps-heading { margin-bottom: 18px; }
+        .next-steps-heading h2 { margin: 0 0 4px; font-size: 19px; }
+        .next-steps-heading p { margin: 0; color: var(--muted); font-size: 12px; }
+        .next-steps-list { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+        .next-step { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; align-items: start; gap: 12px; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: rgba(8,11,24,.32); }
+        .step-number { width: 30px; height: 30px; display: grid; place-items: center; border: 1px solid rgba(112,170,255,.3); border-radius: 50%; background: rgba(112,170,255,.1); color: #c7dcff; font-size: 12px; font-weight: 700; }
+        .step-copy h3 { margin: 0 0 3px; font-size: 13px; }
+        .step-copy p { margin: 0; color: var(--muted); font-size: 12px; }
+        .step-status { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font-size: 10px; white-space: nowrap; }
+        .step-status::before { width: 6px; height: 6px; border-radius: 50%; background: currentColor; content: ""; }
+        .step-status.done { border-color: rgba(119,227,226,.22); background: rgba(119,227,226,.08); color: var(--cyan); }
+        .step-status.attention { border-color: rgba(255,193,115,.28); background: rgba(255,193,115,.08); color: #f2d4a9; }
+        .step-link { display: inline-flex; align-items: center; gap: 5px; margin-top: 7px; color: #a9ceff; font-size: 11px; font-weight: 600; text-decoration: none; }
+        .step-link:hover { color: var(--text); text-decoration: underline; }
+        .notice-banner { margin: 18px 0; padding: 13px 16px; border: 1px solid rgba(119,227,226,.25); border-radius: 10px; background: rgba(119,227,226,.07); color: var(--cyan); font-size: 13px; }
+        .retry { padding: 6px 9px; border: 1px solid rgba(112,170,255,.35); border-radius: 8px; background: rgba(112,170,255,.1); color: #c7dcff; cursor: pointer; font: inherit; font-size: 11px; }
+        .empty { padding: 44px 20px; color: var(--muted); text-align: center; }
+        .empty strong { display: block; margin-bottom: 5px; color: var(--text); }
+        .notice { margin-top: 20px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 11px; color: var(--muted); font-size: 12px; }
+        :focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
+        @media (max-width: 640px) {
+            .shell { width: min(100% - 28px, 520px); }
+            .nav { min-height: 66px; }
+            .nav-right { gap: 10px; font-size: 12px; }
+            main { padding-top: 34px; }
+            .stats { grid-template-columns: 1fr; gap: 10px; margin: 22px 0; }
+            .stat { padding: 15px 17px; }
+            .stat strong { display: inline-block; margin: 0 0 0 9px; font-size: 21px; }
+            .stat span { display: inline; }
+            .next-steps { padding: 16px; }
+            .next-step { grid-template-columns: 30px minmax(0, 1fr); gap: 10px; padding: 12px; }
+            .next-step .step-status { grid-column: 2; justify-self: start; }
+            th, td { padding: 12px 14px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="shell nav">
+            <a class="brand" href="{{ url_for('hello_world') }}">
+                <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/><ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(-30 12 12)" stroke="currentColor" stroke-width="1.5"/></svg></span>
+                Space Zone <span style="color: var(--muted); font-size: 12px; font-weight: 500;">Admin</span>
+            </a>
+            <div class="nav-right">
+                <span>{{ admin_username }}</span>
+                <a href="{{ url_for('hello_world') }}">View site</a>
+                <form method="post" action="{{ url_for('admin_logout') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <button class="logout" type="submit">Sign out</button>
+                </form>
+            </div>
+        </div>
+    </header>
+    <main class="shell">
+        <span class="eyebrow">Workspace overview</span>
+        <h1>Admin dashboard</h1>
+        <p class="subheading">Review recent requests for Space Zone trial information.</p>
+        {% if notice %}
+        <p class="notice-banner" role="status">{{ notice }}</p>
+        {% endif %}
+        {% if not email_configured %}
+        <aside class="email-setup" role="status">
+            <strong>Welcome emails are not configured</strong>
+            <p>Requests are saved, but no email was sent. Add <code>RESEND_API_KEY</code> and <code>SPACEZONE_FROM_EMAIL</code> to the environment used to start Flask. Set the sender to an address verified in Resend, then restart the server. You can use “Retry email” on saved requests after setup.</p>
+        </aside>
+        {% endif %}
+
+        <section class="stats" aria-label="Signup summary">
+            <article class="stat"><span>Total email requests</span><strong>{{ totals.total or 0 }}</strong></article>
+            <article class="stat"><span>Welcome emails sent</span><strong>{{ totals.sent or 0 }}</strong></article>
+            <article class="stat"><span>Need email setup or retry</span><strong>{{ totals.needs_attention or 0 }}</strong></article>
+        </section>
+
+        <section class="next-steps" aria-labelledby="next-steps-heading">
+            <div class="next-steps-heading">
+                <h2 id="next-steps-heading">Recommended next steps</h2>
+                <p>A short checklist to keep request handling reliable and your site ready for launch.</p>
+            </div>
+            <ol class="next-steps-list">
+                <li class="next-step">
+                    <span class="step-number" aria-hidden="true">1</span>
+                    <div class="step-copy">
+                        <h3>Configure welcome email delivery</h3>
+                        {% if email_configured %}
+                        <p>Your email credentials and sender are configured. Keep the sender verified with your email provider.</p>
+                        {% else %}
+                        <p>Add <code>RESEND_API_KEY</code> and a verified <code>SPACEZONE_FROM_EMAIL</code> to the server environment, then restart Flask.</p>
+                        {% endif %}
+                    </div>
+                    <span class="step-status {{ 'done' if email_configured else 'attention' }}">{{ "Configured" if email_configured else "Action required" }}</span>
+                </li>
+                <li class="next-step">
+                    <span class="step-number" aria-hidden="true">2</span>
+                    <div class="step-copy">
+                        <h3>Review recent email requests</h3>
+                        <p>Check each address, request time, and delivery status before taking action.</p>
+                        <a class="step-link" href="#signup-heading">Go to recent requests <span aria-hidden="true">→</span></a>
+                    </div>
+                    <span class="step-status">{{ "Ready to review" if totals.total else "Waiting for requests" }}</span>
+                </li>
+                <li class="next-step">
+                    <span class="step-number" aria-hidden="true">3</span>
+                    <div class="step-copy">
+                        <h3>Resolve emails that were not sent</h3>
+                        {% if totals.needs_attention %}
+                        <p>{{ totals.needs_attention }} request{{ "" if totals.needs_attention == 1 else "s" }} need{{ "s" if totals.needs_attention == 1 else "" }} attention. Configure delivery first, then retry from the request list.</p>
+                        {% else %}
+                        <p>No unsent requests need attention right now. Check this list again after new requests arrive.</p>
+                        {% endif %}
+                        {% if totals.needs_attention %}
+                        <a class="step-link" href="#signup-heading">Review and retry requests <span aria-hidden="true">→</span></a>
+                        {% endif %}
+                    </div>
+                    <span class="step-status {{ 'attention' if totals.needs_attention else 'done' }}">{{ "Attention needed" if totals.needs_attention else "Up to date" }}</span>
+                </li>
+                <li class="next-step">
+                    <span class="step-number" aria-hidden="true">4</span>
+                    <div class="step-copy">
+                        <h3>Complete the pre-launch security check</h3>
+                        <p>Use a unique, strong admin password, keep secrets out of source control, and enable HTTPS before sharing the site publicly.</p>
+                    </div>
+                    <span class="step-status">Before launch</span>
+                </li>
+            </ol>
+        </section>
+
+        <section class="table-card" aria-labelledby="signup-heading">
+            <div class="table-heading">
+                <h2 id="signup-heading">Recent trial requests</h2>
+                <span>Showing up to 200 latest requests</span>
+            </div>
+            {% if signups %}
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Email</th><th>Requested at (UTC)</th><th>Email status</th><th>Action</th></tr></thead>
+                    <tbody>
+                        {% for signup in signups %}
+                        <tr>
+                            <td>{{ signup.email }}</td>
+                            <td>{{ signup.requested_at }}</td>
+                            <td>
+                                {% if signup.email_status == 'not_configured' %}
+                                <span class="status">Not configured — not sent</span>
+                                {% elif signup.email_status == 'sent' %}
+                                <span class="status sent">Sent</span>
+                                {% elif signup.email_status == 'failed' %}
+                                <span class="status failed">Send failed</span>
+                                {% else %}
+                                <span class="status">{{ signup.email_status | replace('_', ' ') }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if signup.email_status != 'sent' %}
+                                <form method="post" action="{{ url_for('admin_resend_welcome_email', signup_id=signup.id) }}">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                    <button class="retry" type="submit">Retry email</button>
+                                </form>
+                                {% else %}
+                                <span style="color: var(--muted);">—</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty"><strong>No trial requests yet</strong>Requests submitted through the website will appear here.</div>
+            {% endif %}
+        </section>
+        <p class="notice">This dashboard lists email requests only. It does not activate accounts or subscriptions. Protect this admin page with a strong password and use HTTPS before making the site public.</p>
+    </main>
+</body>
+</html>

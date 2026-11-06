@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#080b18">
+    <title>Your dashboard | Space Zone</title>
+    <style>
+        :root { color-scheme: dark; --page: #100d1d; --panel: #19152a; --text: #f7f4ff; --muted: #b3accb; --line: rgba(205,188,255,.16); --accent: #b69cff; --cyan: #79e5d2; }
+        * { box-sizing: border-box; }
+        body { min-height: 100vh; margin: 0; background: radial-gradient(ellipse at 12% 0, rgba(137,93,220,.2), transparent 42%), radial-gradient(ellipse at 100% 85%, rgba(45,187,169,.1), transparent 38%), var(--page); color: var(--text); font: 15px/1.6 "Segoe UI", sans-serif; }
+        .shell { width: min(100% - 40px, 900px); margin: 0 auto; }
+        header { border-bottom: 1px solid var(--line); background: rgba(16,13,29,.88); backdrop-filter: blur(18px); }
+        .header-row { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+        .brand { display: inline-flex; align-items: center; gap: 10px; color: var(--text); font-size: 18px; font-weight: 700; text-decoration: none; }
+        .brand-mark { width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid rgba(112,170,255,.5); border-radius: 11px; background: rgba(112,170,255,.08); color: var(--cyan); }
+        .brand-mark svg { width: 20px; height: 20px; }
+        .header-actions { display: flex; align-items: center; gap: 16px; }
+        .user-name { display: inline-block; padding: 4px 10px; border: 1px solid rgba(121,229,210,.24); border-radius: 999px; background: rgba(121,229,210,.09); color: #9af0df; font-weight: 700; }
+        a { color: #a9ceff; }
+        .header-actions form { margin: 0; }
+        button { font: inherit; cursor: pointer; }
+        .quiet-button { padding: 8px 12px; border: 1px solid var(--line); border-radius: 9px; background: transparent; color: var(--text); }
+        main { padding: 42px 0; }
+        h1, h2 { font-family: "Segoe UI", sans-serif; letter-spacing: -.6px; }
+        h1 { margin: 0 0 8px; font-size: clamp(30px, 5vw, 42px); }
+        .greeting-name { display: inline-block; color: #86ecd9; background: linear-gradient(100deg, #86ecd9, #9eb5ff 75%); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .lead { margin: 0 0 24px; color: var(--muted); }
+        .marketing-panel { margin-bottom: 20px; }
+        .section-intro { margin: 6px 0 15px; color: var(--muted); font-size: 13px; }
+        .quick-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+        .quick-card { display: flex; min-height: 144px; height: 100%; flex-direction: column; align-items: flex-start; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: linear-gradient(145deg, rgba(112,170,255,.08), rgba(112,170,255,.025)); color: var(--text); text-decoration: none; transition: transform .18s ease, border-color .18s ease, background .18s ease; }
+        .quick-card:hover { transform: translateY(-2px); border-color: rgba(112,170,255,.48); background: rgba(112,170,255,.09); }
+        .quick-icon { width: 34px; height: 34px; display: grid; place-items: center; margin-bottom: 12px; border: 1px solid rgba(112,170,255,.2); border-radius: 10px; background: rgba(112,170,255,.11); color: var(--cyan); font-weight: 700; }
+        .quick-card strong { margin-bottom: 5px; font-size: 14px; }
+        .quick-card span:last-child { color: var(--muted); font-size: 12px; line-height: 1.5; }
+        .workflow-note { margin: 16px 0 0; color: var(--muted); font-size: 12px; }
+        .workflow-note strong { color: var(--text); }
+        .panel { padding: 20px; border: 1px solid rgba(182,156,255,.2); border-radius: 16px; background: linear-gradient(145deg, rgba(30,24,48,.94), rgba(19,17,34,.96)); box-shadow: 0 22px 58px rgba(0,0,0,.24); }
+        .panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+        h2 { margin: 0; font-size: 21px; }
+        .primary-link { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; padding: 0 15px; border-radius: 9px; background: linear-gradient(110deg,#3479ed,#43b1ef); color: #fff; font-weight: 700; text-decoration: none; }
+        .empty { padding: 22px; border: 1px dashed var(--line); border-radius: 11px; color: var(--muted); text-align: center; }
+        .item-list { display: grid; gap: 10px; padding: 0; list-style: none; }
+        .item { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 15px; border: 1px solid var(--line); border-radius: 11px; background: rgba(112,170,255,.035); }
+        .item h3 { margin: 0 0 4px; font-size: 15px; }
+        .item-meta { margin: 0; color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+        .item-actions { display: flex; flex: 0 0 auto; align-items: center; gap: 12px; }
+        .delete-button { padding: 6px 9px; border: 1px solid rgba(255,140,150,.28); border-radius: 8px; background: transparent; color: #ffb3bb; }
+        :focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
+        @media (max-width: 600px) {
+            .quick-grid { grid-template-columns: 1fr; gap: 10px; }
+            .quick-card { min-height: 0; display: grid; grid-template-columns: 38px 1fr; column-gap: 12px; padding: 15px; }
+            .quick-icon { grid-row: span 2; margin: 0; }
+            .header-row, .panel-heading, .item { align-items: flex-start; flex-direction: column; }
+            .header-actions { width: 100%; justify-content: space-between; }
+            .item-actions { width: 100%; justify-content: flex-start; }
+            main { padding: 38px 0; }
+            .panel { padding: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="shell header-row">
+            <a class="brand" href="{{ url_for('hello_world') }}">
+                <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/><ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(-30 12 12)" stroke="currentColor" stroke-width="1.5"/></svg></span>
+                Space Zone
+            </a>
+            <div class="header-actions">
+                <span>Hi, <strong class="user-name">{{ user["display_name"] }}</strong></span>
+                <a href="{{ url_for('hello_world') }}#tool-marketing">Open marketing tools</a>
+                <form method="post" action="{{ url_for('user_logout') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <button class="quiet-button" type="submit">Sign out</button>
+                </form>
+            </div>
+        </div>
+    </header>
+    <main class="shell">
+        <h1>Hi, <span class="greeting-name">{{ user["display_name"] }}</span></h1>
+        <p class="lead">Welcome to your dashboard. Start a marketing task, then keep useful results saved here.</p>
+        <section class="panel marketing-panel" aria-labelledby="marketing-tools-title">
+            <h2 id="marketing-tools-title">What would you like to work on?</h2>
+            <p class="section-intro">Jump straight into a practical task. Your generated work can be saved to this private dashboard.</p>
+            <div class="quick-grid">
+                <a class="quick-card" href="{{ url_for('hello_world') }}#tool-marketing">
+                    <span class="quick-icon" aria-hidden="true">↗</span>
+                    <strong>Build a campaign link</strong>
+                    <span>Add tracking details to an email, social, or ad URL.</span>
+                </a>
+                <a class="quick-card" href="{{ url_for('hello_world') }}#tool-marketing-checklist">
+                    <span class="quick-icon" aria-hidden="true">✓</span>
+                    <strong>Plan a campaign launch</strong>
+                    <span>Create a goal-based checklist for your next campaign.</span>
+                </a>
+                <a class="quick-card" href="{{ url_for('hello_world') }}#tool-backlinks">
+                    <span class="quick-icon" aria-hidden="true">↗</span>
+                    <strong>Plan backlink outreach</strong>
+                    <span>Draft a personal note for a relevant site or resource.</span>
+                </a>
+                <a class="quick-card" href="{{ url_for('hello_world') }}#tool-audit">
+                    <span class="quick-icon" aria-hidden="true">⌕</span>
+                    <strong>Check a page before publishing</strong>
+                    <span>Review pasted HTML for common SEO and accessibility basics.</span>
+                </a>
+            </div>
+            <p class="workflow-note"><strong>Simple workflow:</strong> choose a task, generate your result, then use “Save to dashboard” to keep it handy.</p>
+        </section>
+        <section class="panel" aria-labelledby="saved-items-title">
+            <div class="panel-heading">
+                <h2 id="saved-items-title">Saved tool results and files</h2>
+                <a class="primary-link" href="{{ url_for('hello_world') }}#tools">Explore tools</a>
+            </div>
+            {% if saved_items %}
+            <ul class="item-list">
+                {% for item in saved_items %}
+                <li class="item">
+                    <div>
+                        <h3>{{ item["title"] }}</h3>
+                        <p class="item-meta">{{ item["filename"] }} · Saved {{ item["created_at"]|replace("T", " ") }} UTC</p>
+                    </div>
+                    <div class="item-actions">
+                        <a href="{{ url_for('download_dashboard_item', item_id=item['id']) }}">Download</a>
+                        <form method="post" action="{{ url_for('delete_dashboard_item', item_id=item['id']) }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <button class="delete-button" type="submit">Delete</button>
+                        </form>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <div class="empty">You haven’t saved any results yet. Use a tool and choose “Save to dashboard” to keep its result here.</div>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>

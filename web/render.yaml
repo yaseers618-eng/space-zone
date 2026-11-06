@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: spacezone
+    runtime: python
+    plan: starter
+    region: oregon
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 60
+    healthCheckPath: /healthz
+    envVars:
+      - key: FLASK_SECRET_KEY
+        generateValue: true
+      - key: SESSION_COOKIE_SECURE
+        value: "true"
+      - key: SPACEZONE_DATA_DIR
+        value: /var/data
+      - key: ADMIN_USERNAME
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: SPACEZONE_FROM_EMAIL
+        sync: false
+      - key: ADMIN_RECOVERY_EMAIL
+        sync: false
+      - key: SPACEZONE_PUBLIC_URL
+        sync: false
+    disk:
+      name: spacezone-data
+      mountPath: /var/data
+      sizeGB: 1

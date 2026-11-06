@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#080b18">
+    <title>{{ "Create account" if mode == "signup" else "Sign in" }} | Space Zone</title>
+    <style>
+        :root { color-scheme: dark; --page: #080b18; --panel: #101528; --text: #f5f6ff; --muted: #a1a8c2; --line: rgba(198,205,255,.15); --accent: #70aaff; --cyan: #7be0f2; }
+        * { box-sizing: border-box; }
+        body { min-height: 100vh; margin: 0; display: grid; place-items: center; padding: 24px; background: radial-gradient(ellipse at 50% 0, rgba(38,130,242,.24), transparent 55%), radial-gradient(ellipse at 100% 100%, rgba(123,224,242,.06), transparent 45%), var(--page); color: var(--text); font: 15px/1.6 "Segoe UI", sans-serif; }
+        .panel { width: min(100%, 450px); padding: 32px; border: 1px solid rgba(112,170,255,.22); border-radius: 20px; background: linear-gradient(145deg, rgba(21,27,50,.97), rgba(12,17,34,.98)); box-shadow: 0 24px 80px rgba(0,0,0,.38), 0 0 55px rgba(52,121,237,.08); }
+        .brand { display: inline-flex; align-items: center; gap: 10px; color: var(--text); font-size: 18px; font-weight: 700; text-decoration: none; }
+        .brand-mark { width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid rgba(112,170,255,.5); border-radius: 11px; background: rgba(112,170,255,.08); color: var(--cyan); }
+        .brand-mark svg { width: 20px; height: 20px; }
+        h1 { margin: 30px 0 6px; font-size: 28px; letter-spacing: -.7px; }
+        .intro { margin: 0 0 22px; color: var(--muted); }
+        .error { margin-bottom: 17px; padding: 11px 13px; border: 1px solid rgba(255,140,150,.3); border-radius: 9px; background: rgba(255,140,150,.08); color: #ffb3bb; font-size: 13px; }
+        label { display: block; margin: 15px 0 6px; color: #e4e7f5; font-size: 13px; font-weight: 600; }
+        input { width: 100%; min-height: 45px; padding: 0 12px; border: 1px solid var(--line); border-radius: 9px; outline: none; background: #0b1021; color: var(--text); font: inherit; }
+        input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(112,170,255,.16); }
+        button { width: 100%; min-height: 46px; margin-top: 22px; border: 0; border-radius: 10px; background: linear-gradient(110deg,#3479ed,#43b1ef); box-shadow: 0 7px 22px rgba(52,121,237,.22); color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+        .switch, .back { display: block; margin-top: 18px; color: #a9ceff; font-size: 13px; text-align: center; text-decoration: none; }
+        :focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
+    </style>
+</head>
+<body>
+    <main class="panel">
+        <a class="brand" href="{{ url_for('hello_world') }}">
+            <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/><ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(-30 12 12)" stroke="currentColor" stroke-width="1.5"/></svg></span>
+            Space Zone
+        </a>
+        <h1>{{ "Create your account" if mode == "signup" else "Welcome back" }}</h1>
+        <p class="intro">{{ "Sign up to keep your generated tool results and files in your dashboard." if mode == "signup" else "Sign in to see your saved tool results and files." }}</p>
+        {% if message %}
+        <div class="error" role="alert">{{ message }}</div>
+        {% endif %}
+        <form method="post" action="{{ url_for('user_signup' if mode == 'signup' else 'user_login') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            {% if mode == "signup" %}
+            <label for="display_name">Your name</label>
+            <input id="display_name" name="display_name" maxlength="80" autocomplete="name" required>
+            {% endif %}
+            <label for="email">Email address</label>
+            <input id="email" name="email" type="email" maxlength="254" autocomplete="email" required>
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" minlength="12" autocomplete="{{ 'new-password' if mode == 'signup' else 'current-password' }}" required>
+            {% if mode == "signup" %}
+            <label for="confirm_password">Confirm password</label>
+            <input id="confirm_password" name="confirm_password" type="password" minlength="12" autocomplete="new-password" required>
+            {% endif %}
+            <button type="submit">{{ "Create account" if mode == "signup" else "Sign in" }}</button>
+        </form>
+        {% if mode == "signup" %}
+        <a class="switch" href="{{ url_for('user_login') }}">Already have an account? Sign in</a>
+        {% else %}
+        <a class="switch" href="{{ url_for('user_signup') }}">New to Space Zone? Create an account</a>
+        {% endif %}
+        <a class="back" href="{{ url_for('hello_world') }}">← Back to Space Zone</a>
+    </main>
+</body>
+</html>
